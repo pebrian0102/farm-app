@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola User - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <!-- SweetAlert2 untuk notifikasi -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="flex min-h-screen bg-gray-200">
+        <!-- Overlay untuk sidebar mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <!-- Sidebar Navigasi -->
+        <aside id="sidebar"
+            class="fixed lg:static inset-y-0 left-0 w-64 bg-gray-800 text-white flex-shrink-0 z-30 transform -translate-x-full lg:translate-x-0">
+            <div class="p-6 text-2xl font-semibold text-center"><ion-icon name="leaf-outline"
+                    class="align-middle"></ion-icon> Admin Farm</div>
+            <nav class="mt-6">
+                <a href="index.html"
+                    class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors"><ion-icon
+                        name="grid-outline"></ion-icon><span>Dashboard</span></a>
+                <a href="kelola-user.html"
+                    class="flex items-center gap-3 px-6 py-3 bg-green-700 text-white font-bold"><ion-icon
+                        name="people-outline"></ion-icon><span>Kelola User</span></a>
+                <a href="#" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors"><ion-icon
+                        name="home-outline"></ion-icon><span>Kelola Kandang</span></a>
+                <a href="#" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors"><ion-icon
+                        name="paw-outline"></ion-icon><span>Kelola Sapi</span></a>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6"><a href="../index.html"
+                    class="flex items-center gap-3 text-red-400 hover:text-red-300"><ion-icon
+                        name="log-out-outline"></ion-icon><span>Logout</span></a></div>
+        </aside>
+
+        <!-- Konten Utama -->
+        <div class="flex-1 flex flex-col">
+            <div class="flex-1">
+                <header class="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-40">
+                    <div class="flex items-center">
+                        <button id="hamburger-btn" class="lg:hidden text-gray-600 mr-4"><ion-icon name="menu-outline"
+                                class="text-2xl"></ion-icon></button>
+                        <h1 class="text-xl font-bold text-gray-800">Kelola Pengguna</h1>
+                    </div>
+                    <button id="add-user-btn"
+                        class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center gap-2">
+                        <ion-icon name="add-circle-outline"></ion-icon><span class="hidden sm:inline">Tambah User</span>
+                    </button>
+                </header>
+                <!-- FIX: Menghapus 'overflow-x-hidden' dari <main> -->
+                <main class="flex-1 bg-gray-100 p-4 md:p-6">
+                    <!-- Filter Section -->
+                    <div
+                        class="sticky top-16 z-10 lg:sticky lg:top-16 mb-6 bg-gray-100 lg:bg-white py-2 lg:p-4 lg:rounded-lg lg:shadow-sm">
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded-lg shadow-sm lg:shadow-none">
+                            <input id="search-input" type="search" placeholder="Cari nama atau username..."
+                                class="md:col-span-2 w-full p-2 border border-gray-300 rounded-lg">
+                            <select id="role-filter" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="semua">Semua Role</option>
+                                <option value="Superadmin">Superadmin</option>
+                                <option value="Admin Kandang">Admin Kandang</option>
+                                <option value="Penjual">Penjual</option>
+                                <option value="Tamu">Tamu</option>
+                            </select>
+                            <!-- Filter Kelompok Baru -->
+                            <div id="kelompok-filter-container" class="hidden">
+                                <select id="kelompok-filter" class="w-full p-2 border border-gray-300 rounded-lg">
+                                    <option value="semua">Semua Kelompok</option>
+                                    <option value="Agen">Agen</option>
+                                    <option value="Reseller">Reseller</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tampilan Tabel untuk Desktop -->
+                    <div class="hidden lg:block bg-white shadow-md rounded-lg overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3">Nama/PIC/Kelompok</th>
+                                    <th class="px-6 py-3">Username</th>
+                                    <th class="px-6 py-3">Role</th>
+                                    <th class="px-6 py-3">Kelompok</th>
+                                    <th class="px-6 py-3">Alamat</th>
+                                    <th class="px-6 py-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tampilan Kartu untuk Mobile -->
+                    <div id="user-card-container" class="lg:hidden space-y-4"></div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Modal Form Tambah/Edit User -->
+        <div id="user-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-2xl max-h-full overflow-y-auto">
+                <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6">Tambah User Baru</h2>
+                <form id="user-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Data Login & Role -->
+                        <div class="md:col-span-2 p-4 border rounded-lg">
+                            <p class="text-sm font-semibold text-gray-600 mb-2">Data Login & Role</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium">Username</label><input name="username"
+                                        type="text" class="mt-1 w-full p-2 border rounded-lg"></div>
+                                <div><label class="block text-sm font-medium">Password</label><input name="password"
+                                        type="password" class="mt-1 w-full p-2 border rounded-lg"
+                                        placeholder="Kosongkan jika tidak ingin ganti"></div>
+                                <div><label class="block text-sm font-medium">Role</label><select name="role"
+                                        id="role-select" class="mt-1 w-full p-2 border rounded-lg">
+                                        <option value="Superadmin">Superadmin</option>
+                                        <option value="Admin Kandang">Admin Kandang</option>
+                                        <option value="Penjual">Penjual</option>
+                                        <option value="Tamu">Tamu</option>
+                                    </select></div>
+                            </div>
+                        </div>
+
+                        <!-- Data Penjual (Agen / Reseller) -->
+                        <div class="md:col-span-2 p-4 border rounded-lg">
+                            <p class="text-sm font-semibold text-gray-600 mb-2">Data Penjual (Opsional)</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm font-medium">Kelompok Penjual</label><select
+                                        name="kelompok" id="kelompok-select" class="mt-1 w-full p-2 border rounded-lg">
+                                        <option value="">- Bukan Penjual -</option>
+                                        <option value="Agen">Agen</option>
+                                        <option value="Reseller">Reseller</option>
+                                    </select></div>
+                                <div><label class="block text-sm font-medium">Nama Lengkap (Reseller)</label><input
+                                        name="nama" type="text" class="mt-1 w-full p-2 border rounded-lg"></div>
+                                <div><label class="block text-sm font-medium">Nama Kelompok (Agen)</label><input
+                                        name="namaKelompok" type="text" class="mt-1 w-full p-2 border rounded-lg"></div>
+                                <div><label class="block text-sm font-medium">Nama PIC (Agen)</label><input
+                                        name="namaPic" type="text" class="mt-1 w-full p-2 border rounded-lg"></div>
+                            </div>
+                        </div>
+
+                        <!-- Data Umum -->
+                        <div class="md:col-span-2 p-4 border rounded-lg">
+                            <p class="text-sm font-semibold text-gray-600 mb-2">Data Umum</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2"><label
+                                        class="block text-sm font-medium">Alamat</label><textarea name="alamat" rows="2"
+                                        class="mt-1 w-full p-2 border rounded-lg"></textarea></div>
+                                <div><label class="block text-sm font-medium">No. Rekening</label><input name="rekening"
+                                        type="text" class="mt-1 w-full p-2 border rounded-lg"></div>
+                                <div><label class="block text-sm font-medium">Nama di Rekening</label><input
+                                        name="namaRekening" type="text" class="mt-1 w-full p-2 border rounded-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-end gap-3">
+                        <button type="button" id="cancel-btn"
+                            class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg">Batal</button>
+                        <button type="submit"
+                            class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // --- DATA SIMULASI ---
+                const users = [
+                    { id: 1, nama: 'Admin Utama', username: 'superadmin', role: 'Superadmin', kelompok: '', namaKelompok: '', namaPic: '', alamat: 'Kantor Pusat, Jakarta', rekening: '111222333', namaRekening: 'Admin Utama' },
+                    { id: 2, nama: 'Siti Aminah', username: 'admin_kandang_a', role: 'Admin Kandang', kelompok: '', namaKelompok: '', namaPic: '', alamat: 'Kandang A, Boyolali', rekening: '444555666', namaRekening: 'Siti Aminah' },
+                    { id: 3, nama: '', username: 'agen_jaya', role: 'Penjual', kelompok: 'Agen', namaKelompok: 'Agen Jaya Makmur', namaPic: 'Joko Susilo', alamat: 'Jl. Merdeka 1, Salatiga', rekening: '777888999', namaRekening: 'Agen Jaya Makmur CV' },
+                    { id: 4, nama: 'Dewi Lestari', username: 'dewi_reseller', role: 'Penjual', kelompok: 'Reseller', namaKelompok: '', namaPic: '', alamat: 'Dusun Makmur, Klaten', rekening: '123123123', namaRekening: 'Dewi Lestari' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                    { id: 5, nama: 'Pengunjung', username: 'tamu', role: 'Tamu', kelompok: '', namaKelompok: '', namaPic: '', alamat: '', rekening: '', namaRekening: '' },
+                ];
+
+                const userTableBody = document.getElementById('user-table-body');
+                const userCardContainer = document.getElementById('user-card-container');
+                const searchInput = document.getElementById('search-input');
+                const roleFilter = document.getElementById('role-filter');
+                const kelompokFilterContainer = document.getElementById('kelompok-filter-container');
+                const kelompokFilter = document.getElementById('kelompok-filter');
+
+                // --- FUNGSI RENDER DATA ---
+                function renderUsers() {
+                    userTableBody.innerHTML = '';
+                    userCardContainer.innerHTML = '';
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const selectedRole = roleFilter.value;
+                    const selectedKelompok = kelompokFilter.value;
+
+                    const filteredUsers = users.filter(user => {
+                        const searchCorpus = `${user.nama} ${user.username} ${user.namaKelompok} ${user.namaPic}`.toLowerCase();
+                        const matchesSearch = searchCorpus.includes(searchTerm);
+                        const matchesRole = selectedRole === 'semua' || user.role === selectedRole;
+                        const matchesKelompok = user.role !== 'Penjual' || selectedKelompok === 'semua' || user.kelompok === selectedKelompok;
+                        return matchesSearch && matchesRole && matchesKelompok;
+                    });
+
+                    filteredUsers.forEach(user => {
+                        const roleColors = { Superadmin: 'bg-red-100 text-red-800', 'Admin Kandang': 'bg-yellow-100 text-yellow-800', Penjual: 'bg-blue-100 text-blue-800', Tamu: 'bg-gray-100 text-gray-800' };
+                        const roleBadge = `<span class="${roleColors[user.role]} text-xs font-medium px-2.5 py-0.5 rounded">${user.role}</span>`;
+                        const kelompokText = user.kelompok || '-';
+                        const mainName = user.kelompok === 'Agen' ? `${user.namaKelompok} (PIC: ${user.namaPic})` : user.nama;
+                        const cardName = user.kelompok === 'Agen' ? `<p class="font-bold text-gray-800">${user.namaKelompok}</p><p class="text-sm text-gray-600">PIC: ${user.namaPic}</p>` : `<p class="font-bold text-gray-800">${user.nama}</p>`;
+
+                        const dataAttributes = `data-id="${user.id}" data-nama="${user.nama}" data-username="${user.username}" data-role="${user.role}" data-kelompok="${user.kelompok}" data-alamat="${user.alamat}" data-rekening="${user.rekening}" data-namarekening="${user.namaRekening}" data-namakelompok="${user.namaKelompok}" data-namapic="${user.namaPic}"`;
+
+                        userTableBody.innerHTML += `<tr class="user-item bg-white border-b hover:bg-gray-50" ${dataAttributes}><td class="px-6 py-4 font-medium text-gray-900">${mainName}</td><td class="px-6 py-4">${user.username}</td><td class="px-6 py-4">${roleBadge}</td><td class="px-6 py-4">${kelompokText}</td><td class="px-6 py-4">${user.alamat}</td><td class="px-6 py-4 flex gap-3"><button class="edit-btn text-blue-600 hover:text-blue-800"><ion-icon name="create-outline" class="text-xl"></ion-icon></button><button class="delete-btn text-red-600 hover:text-red-800"><ion-icon name="trash-outline" class="text-xl"></ion-icon></button></td></tr>`;
+                        userCardContainer.innerHTML += `<div class="user-item bg-white p-4 rounded-lg shadow-md" ${dataAttributes}><div class="flex justify-between items-start"><div>${cardName}<p class="text-sm text-gray-500">${user.username}</p></div>${roleBadge}</div><div class="text-sm text-gray-600 mt-2"><p>${user.alamat}</p>${user.role === 'Penjual' ? `<p class="font-semibold mt-1">Kelompok: ${kelompokText}</p>` : ''}</div><div class="mt-4 pt-4 border-t flex justify-end gap-3"><button class="edit-btn text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center gap-1"><ion-icon name="create-outline"></ion-icon> Edit</button><button class="delete-btn text-red-600 hover:text-red-800 text-sm font-semibold flex items-center gap-1"><ion-icon name="trash-outline"></ion-icon> Hapus</button></div></div>`;
+                    });
+                    addEventListenersToButtons();
+                }
+
+                // --- MODAL LOGIC ---
+                const addUserBtn = document.getElementById('add-user-btn');
+                const userModal = document.getElementById('user-modal');
+                const userForm = document.getElementById('user-form');
+                const cancelBtn = document.getElementById('cancel-btn');
+                const modalTitle = document.getElementById('modal-title');
+
+                function openModal() { userModal.classList.remove('hidden'); }
+                function closeModal() { userModal.classList.add('hidden'); }
+
+                addUserBtn.addEventListener('click', () => {
+                    modalTitle.textContent = 'Tambah User Baru';
+                    userForm.reset();
+                    openModal();
+                });
+
+                cancelBtn.addEventListener('click', closeModal);
+
+                // --- EVENT LISTENERS UNTUK TOMBOL AKSI ---
+                function addEventListenersToButtons() {
+                    document.querySelectorAll('.edit-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const item = e.currentTarget.closest('.user-item');
+                            const data = item.dataset;
+
+                            modalTitle.textContent = 'Edit User';
+                            userForm.role.value = data.role;
+                            userForm.username.value = data.username;
+                            userForm.kelompok.value = data.kelompok;
+                            userForm.namaKelompok.value = data.namakelompok;
+                            userForm.namaPic.value = data.namapic;
+                            userForm.nama.value = data.nama;
+                            userForm.alamat.value = data.alamat;
+                            userForm.rekening.value = data.rekening;
+                            userForm.namaRekening.value = data.namarekening;
+
+                            openModal();
+                        });
+                    });
+
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const item = e.currentTarget.closest('.user-item');
+                            const mainName = item.dataset.kelompok === 'Agen' ? item.dataset.namakelompok : item.dataset.nama;
+
+                            Swal.fire({
+                                title: 'Anda yakin?', text: `Data untuk "${mainName}" akan dihapus!`, icon: 'warning',
+                                showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6',
+                                confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    Swal.fire('Dihapus!', `Data ${mainName} telah dihapus.`, 'success');
+                                }
+                            });
+                        });
+                    });
+                }
+
+                // --- RESPONSIVE SIDEBAR LOGIC ---
+                const hamburgerBtn = document.getElementById('hamburger-btn');
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                function openSidebar() { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); }
+                function closeSidebar() { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); }
+                hamburgerBtn.addEventListener('click', openSidebar);
+                overlay.addEventListener('click', closeSidebar);
+
+                // --- INITIAL RENDER & FILTER LISTENERS ---
+                function handleFilterChange() {
+                    if (roleFilter.value === 'Penjual') {
+                        kelompokFilterContainer.classList.remove('hidden');
+                    } else {
+                        kelompokFilterContainer.classList.add('hidden');
+                        kelompokFilter.value = 'semua';
+                    }
+                    renderUsers();
+                }
+
+                searchInput.addEventListener('keyup', renderUsers);
+                roleFilter.addEventListener('change', handleFilterChange);
+                kelompokFilter.addEventListener('change', renderUsers);
+
+                handleFilterChange(); // Panggil saat pertama kali load
+            });
+        </script>
+</body>
+
+</html>

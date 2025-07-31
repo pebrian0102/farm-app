@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Farm App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="flex h-screen bg-gray-200">
+        <!-- Overlay untuk sidebar mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <!-- Sidebar Navigasi -->
+        <aside id="sidebar"
+            class="fixed lg:static inset-y-0 left-0 w-64 bg-gray-800 text-white flex-shrink-0 z-30 transform -translate-x-full lg:translate-x-0">
+            <div class="p-6 text-2xl font-semibold text-center">
+                <ion-icon name="leaf-outline" class="align-middle"></ion-icon> Admin Farm
+            </div>
+            <nav class="mt-6">
+                <a href="index.html" class="flex items-center gap-3 px-6 py-3 bg-green-700 text-white font-bold">
+                    <ion-icon name="grid-outline"></ion-icon>
+                    <span>Dashboard</span>
+                </a>
+                <a href="kelola-user.html"
+                    class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <span>Kelola User</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors">
+                    <ion-icon name="home-outline"></ion-icon>
+                    <span>Kelola Kandang</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors">
+                    <ion-icon name="paw-outline"></ion-icon>
+                    <span>Kelola Sapi</span>
+                </a>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6">
+                <a href="../index.html" class="flex items-center gap-3 text-red-400 hover:text-red-300">
+                    <ion-icon name="log-out-outline"></ion-icon>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Konten Utama -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <!-- Tombol Hamburger untuk Mobile -->
+                    <button id="hamburger-btn" class="lg:hidden text-gray-600 mr-4">
+                        <ion-icon name="menu-outline" class="text-2xl"></ion-icon>
+                    </button>
+                    <h1 class="text-xl font-bold text-gray-800">Dashboard</h1>
+                </div>
+            </header>
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Selamat Datang, Admin!</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Kartu Statistik -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-500">Total User</h3>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">15</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-500">Total Sapi</h3>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">128</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-500">Sapi Terjual</h3>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">32</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-500">Total Kandang</h3>
+                        <p class="text-3xl font-bold text-gray-800 mt-2">4</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cancelBtn = document.getElementById('cancel-btn');
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+
+            function openSidebar() {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            }
+            function closeSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+
+            hamburgerBtn.addEventListener('click', openSidebar);
+            overlay.addEventListener('click', closeSidebar);
+        });
+    </script>
+</body>
+
+</html>

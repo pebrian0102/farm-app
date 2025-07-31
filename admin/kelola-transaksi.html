@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Transaksi - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Library SheetJS untuk Export Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        #sidebar,
+        #filter-sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="flex min-h-screen bg-gray-200">
+        <!-- Overlay & Sidebar -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+        <aside id="sidebar"
+            class="fixed lg:static inset-y-0 left-0 w-64 bg-gray-800 text-white flex-shrink-0 z-30 transform -translate-x-full lg:translate-x-0">
+            <div class="p-6 text-2xl font-semibold text-center"><ion-icon name="leaf-outline"
+                    class="align-middle"></ion-icon> Admin Farm</div>
+            <nav class="mt-6">
+                <a href="index.html" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700"><ion-icon
+                        name="grid-outline"></ion-icon><span>Dashboard</span></a>
+                <a href="kelola-user.html" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700"><ion-icon
+                        name="people-outline"></ion-icon><span>Kelola User</span></a>
+                <a href="kelola-kandang.html" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700"><ion-icon
+                        name="home-outline"></ion-icon><span>Kelola Kandang</span></a>
+                <a href="kelola-sapi.html" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700"><ion-icon
+                        name="paw-outline"></ion-icon><span>Kelola Sapi</span></a>
+                <a href="kelola-transaksi.html"
+                    class="flex items-center gap-3 px-6 py-3 bg-green-700 text-white font-bold"><ion-icon
+                        name="card-outline"></ion-icon><span>Kelola Transaksi</span></a>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6"><a href="../index.html"
+                    class="flex items-center gap-3 text-red-400 hover:text-red-300"><ion-icon
+                        name="log-out-outline"></ion-icon><span>Logout</span></a></div>
+        </aside>
+
+        <!-- Konten Utama -->
+        <div class="flex-1 flex flex-col">
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <button id="hamburger-btn" class="lg:hidden text-gray-600 mr-4"><ion-icon name="menu-outline"
+                            class="text-2xl"></ion-icon></button>
+                    <h1 class="text-xl font-bold text-gray-800">Kelola Transaksi</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="export-excel-btn"
+                        class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                        <ion-icon name="download-outline"></ion-icon><span class="hidden sm:inline">Export Excel</span>
+                    </button>
+                    <button id="add-transaksi-btn"
+                        class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center gap-2">
+                        <ion-icon name="add-circle-outline"></ion-icon><span class="hidden sm:inline">Tambah</span>
+                    </button>
+                    <!-- Tombol Filter Mobile -->
+                    <button id="filter-btn"
+                        class="lg:hidden bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-gray-300">
+                        <ion-icon name="filter-outline" class="text-xl"></ion-icon>
+                    </button>
+                </div>
+            </header>
+            <main class="flex-1 overflow-y-auto bg-gray-100 p-4 md:p-6">
+                <!-- Filter Section (Desktop) -->
+                <div class="hidden lg:block mb-6 bg-white p-4 rounded-lg shadow-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <input id="search-input-desktop" type="search" placeholder="Cari pembeli / no. sapi..."
+                            class="w-full p-2 border rounded-lg">
+                        <select id="status-filter-desktop" class="w-full p-2 border rounded-lg">
+                            <option value="semua">Semua Status</option>
+                            <option value="Lunas">Lunas</option>
+                            <option value="DP">DP</option>
+                            <option value="Dibatalkan">Dibatalkan</option>
+                        </select>
+                        <input id="start-date-filter-desktop" type="date"
+                            class="w-full p-2 border rounded-lg text-gray-500">
+                        <input id="end-date-filter-desktop" type="date"
+                            class="w-full p-2 border rounded-lg text-gray-500">
+                    </div>
+                </div>
+
+                <!-- Tampilan Tabel untuk Desktop -->
+                <div class="hidden lg:block bg-white shadow-md rounded-lg overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3">ID Transaksi</th>
+                                <th class="px-6 py-3">No. Sapi</th>
+                                <th class="px-6 py-3">Pembeli</th>
+                                <th class="px-6 py-3">Tanggal</th>
+                                <th class="px-6 py-3">Total Harga</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Penjual</th>
+                                <th class="px-6 py-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaksi-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Tampilan Kartu untuk Mobile -->
+                <div id="transaksi-card-container" class="lg:hidden space-y-4"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Filter Sidebar (Mobile) -->
+    <div id="filter-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+    <aside id="filter-sidebar"
+        class="fixed top-0 right-0 h-full w-72 bg-white shadow-lg z-40 transform translate-x-full p-6 space-y-4">
+        <div class="flex justify-between items-center">
+            <h3 class="font-bold text-lg">Filter Transaksi</h3>
+            <button id="close-filter-btn" class="text-gray-500"><ion-icon name="close-outline"
+                    class="text-2xl"></ion-icon></button>
+        </div>
+        <input id="search-input-mobile" type="search" placeholder="Cari pembeli / no. sapi..."
+            class="w-full p-2 border rounded-lg">
+        <select id="status-filter-mobile" class="w-full p-2 border rounded-lg">
+            <option value="semua">Semua Status</option>
+            <option value="Lunas">Lunas</option>
+            <option value="DP">DP</option>
+            <option value="Dibatalkan">Dibatalkan</option>
+        </select>
+        <div><label class="text-sm">Dari Tanggal</label><input id="start-date-filter-mobile" type="date"
+                class="w-full p-2 border rounded-lg text-gray-500"></div>
+        <div><label class="text-sm">Sampai Tanggal</label><input id="end-date-filter-mobile" type="date"
+                class="w-full p-2 border rounded-lg text-gray-500"></div>
+    </aside>
+
+    <!-- Modal Form Tambah/Edit Transaksi -->
+    <div id="transaksi-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-3xl max-h-full overflow-y-auto">
+            <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6">Tambah Transaksi Baru</h2>
+            <form id="transaksi-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="block text-sm font-medium">Pilih Sapi (Hanya yg tersedia)</label><select
+                            name="no_sapi" id="sapi-select" class="mt-1 w-full p-2 border rounded-lg" required></select>
+                    </div>
+                    <div><label class="block text-sm font-medium">Penjual</label><select name="penjual"
+                            id="penjual-select" class="mt-1 w-full p-2 border rounded-lg" required></select></div>
+                </div>
+                <div class="p-4 border rounded-lg space-y-4">
+                    <p class="text-sm font-semibold text-gray-600 -mb-2">Data Pembeli</p>
+                    <div><label class="block text-sm font-medium">Nama Pembeli</label><input name="nama_pembeli"
+                            type="text" class="mt-1 w-full p-2 border rounded-lg" required></div>
+                    <div><label class="block text-sm font-medium">Alamat Pembeli</label><textarea name="alamat_pembeli"
+                            rows="2" class="mt-1 w-full p-2 border rounded-lg"></textarea></div>
+                </div>
+                <div class="p-4 border rounded-lg space-y-4">
+                    <p class="text-sm font-semibold text-gray-600 -mb-2">Data Pembayaran</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label class="block text-sm font-medium">Harga Jual (Rp)</label><input name="harga_jual"
+                                type="number" class="mt-1 w-full p-2 border rounded-lg bg-gray-100" readonly></div>
+                        <div><label class="block text-sm font-medium">DP (Rp)</label><input name="dp" type="number"
+                                class="mt-1 w-full p-2 border rounded-lg"></div>
+                        <div><label class="block text-sm font-medium">Metode Bayar</label><select name="metode_bayar"
+                                class="mt-1 w-full p-2 border rounded-lg">
+                                <option>Transfer</option>
+                                <option>Cash</option>
+                            </select></div>
+                    </div>
+                </div>
+                <div class="p-4 border rounded-lg space-y-4">
+                    <p class="text-sm font-semibold text-gray-600 -mb-2">Data Pengiriman & Status</p>
+                    <div><label class="block text-sm font-medium">Alamat Kirim</label><textarea name="alamat_kirim"
+                            rows="2" class="mt-1 w-full p-2 border rounded-lg"></textarea></div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label class="block text-sm font-medium">Tgl Kirim</label><input name="tgl_kirim"
+                                type="date" class="mt-1 w-full p-2 border rounded-lg"></div>
+                        <div><label class="block text-sm font-medium">Jam Kirim</label><input name="jam_kirim"
+                                type="time" class="mt-1 w-full p-2 border rounded-lg"></div>
+                        <div><label class="block text-sm font-medium">Status Transaksi</label><select name="status"
+                                class="mt-1 w-full p-2 border rounded-lg">
+                                <option>DP</option>
+                                <option>Lunas</option>
+                                <option>Dibatalkan</option>
+                            </select></div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end gap-3"><button type="button" id="cancel-btn"
+                        class="bg-gray-200 font-bold py-2 px-6 rounded-lg">Batal</button><button type="submit"
+                        class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg">Simpan</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- DATA SIMULASI ---
+            const sapiData = [{ id: 1, no_sapi: 'S001', harga: 55000000, status: 'Tersedia' }, { id: 2, no_sapi: 'S002', harga: 62000000, status: 'Terjual' }, { id: 3, no_sapi: 'S003', harga: 25000000, status: 'Tersedia' }, { id: 4, no_sapi: 'S004', harga: 35000000, status: 'Tersedia' }];
+            const penjualData = [{ id: 3, nama: 'Joko Susilo (Agen)' }, { id: 4, nama: 'Dewi Lestari (Reseller)' }];
+            const transaksiData = [{ id: 'TRX001', no_sapi: 'S002', pembeli: 'Bpk. Budi Santoso', tanggal: '2025-07-28', total_harga: 62000000, status: 'Lunas', penjual: 'Joko Susilo (Agen)' }, { id: 'TRX002', no_sapi: 'S005', pembeli: 'Ibu Wati', tanggal: '2025-07-30', total_harga: 40000000, status: 'DP', penjual: 'Dewi Lestari (Reseller)' }];
+
+            // --- ELEMENT REFERENCES ---
+            const tableBody = document.getElementById('transaksi-table-body');
+            const cardContainer = document.getElementById('transaksi-card-container');
+            const searchInputDesktop = document.getElementById('search-input-desktop');
+            const statusFilterDesktop = document.getElementById('status-filter-desktop');
+            const startDateFilterDesktop = document.getElementById('start-date-filter-desktop');
+            const endDateFilterDesktop = document.getElementById('end-date-filter-desktop');
+            const searchInputMobile = document.getElementById('search-input-mobile');
+            const statusFilterMobile = document.getElementById('status-filter-mobile');
+            const startDateFilterMobile = document.getElementById('start-date-filter-mobile');
+            const endDateFilterMobile = document.getElementById('end-date-filter-mobile');
+
+            // --- POPULATE SELECTS ---
+            const sapiSelect = document.getElementById('sapi-select');
+            sapiData.filter(s => s.status === 'Tersedia').forEach(s => { sapiSelect.innerHTML += `<option value="${s.no_sapi}" data-harga="${s.harga}">${s.no_sapi}</option>`; });
+            const penjualSelect = document.getElementById('penjual-select');
+            penjualData.forEach(p => { penjualSelect.innerHTML += `<option value="${p.nama}">${p.nama}</option>`; });
+            sapiSelect.addEventListener('change', (e) => {
+                const selectedOption = e.target.options[e.target.selectedIndex];
+                document.querySelector('#transaksi-form input[name="harga_jual"]').value = selectedOption.dataset.harga || '';
+            });
+
+            // --- FILTERING & RENDER LOGIC ---
+            function getFilteredData() {
+                const isMobile = window.innerWidth < 1024;
+                const searchTerm = (isMobile ? searchInputMobile.value : searchInputDesktop.value).toLowerCase();
+                const selectedStatus = isMobile ? statusFilterMobile.value : statusFilterDesktop.value;
+                const startDate = isMobile ? startDateFilterMobile.value : startDateFilterDesktop.value;
+                const endDate = isMobile ? endDateFilterMobile.value : endDateFilterDesktop.value;
+
+                return transaksiData.filter(trx => {
+                    const matchesSearch = trx.pembeli.toLowerCase().includes(searchTerm) || trx.no_sapi.toLowerCase().includes(searchTerm);
+                    const matchesStatus = selectedStatus === 'semua' || trx.status === selectedStatus;
+                    const trxDate = new Date(trx.tanggal);
+                    const matchesStartDate = !startDate || trxDate >= new Date(startDate);
+                    const matchesEndDate = !endDate || trxDate <= new Date(endDate);
+                    return matchesSearch && matchesStatus && matchesStartDate && matchesEndDate;
+                });
+            }
+
+            function renderTransaksi() {
+                tableBody.innerHTML = '';
+                cardContainer.innerHTML = '';
+                const filteredData = getFilteredData();
+
+                filteredData.forEach(trx => {
+                    const statusColors = { Lunas: 'bg-green-100 text-green-800', DP: 'bg-yellow-100 text-yellow-800', Dibatalkan: 'bg-red-100 text-red-800' };
+                    const statusBadge = `<span class="${statusColors[trx.status]} text-xs font-medium px-2.5 py-0.5 rounded">${trx.status}</span>`;
+                    const hargaFormatted = new Intl.NumberFormat('id-ID').format(trx.total_harga);
+                    const dataAttributes = `data-id="${trx.id}"`;
+
+                    tableBody.innerHTML += `<tr class="transaksi-item bg-white border-b hover:bg-gray-50" ${dataAttributes}><td class="px-6 py-4 font-bold text-gray-900">${trx.id}</td><td class="px-6 py-4">${trx.no_sapi}</td><td class="px-6 py-4">${trx.pembeli}</td><td class="px-6 py-4">${trx.tanggal}</td><td class="px-6 py-4">Rp ${hargaFormatted}</td><td class="px-6 py-4">${statusBadge}</td><td class="px-6 py-4">${trx.penjual}</td><td class="px-6 py-4 flex gap-3"><button class="edit-btn"><ion-icon name="create-outline" class="text-xl text-blue-600"></ion-icon></button><button class="delete-btn"><ion-icon name="trash-outline" class="text-xl text-red-600"></ion-icon></button></td></tr>`;
+                    cardContainer.innerHTML += `<div class="transaksi-item bg-white p-4 rounded-lg shadow-md" ${dataAttributes}><div class="flex justify-between items-start"><h3 class="font-bold text-gray-800">${trx.pembeli}</h3>${statusBadge}</div><p class="text-sm text-gray-500">Sapi: ${trx.no_sapi} | ${trx.tanggal}</p><p class="font-semibold mt-1">Rp ${hargaFormatted}</p><p class="text-xs text-gray-500 mt-2">Penjual: ${trx.penjual}</p><div class="mt-4 pt-4 border-t flex justify-end gap-3"><button class="edit-btn text-blue-600 text-sm font-semibold flex items-center gap-1"><ion-icon name="create-outline"></ion-icon> Edit</button><button class="delete-btn text-red-600 text-sm font-semibold flex items-center gap-1"><ion-icon name="trash-outline"></ion-icon> Hapus</button></div></div>`;
+                });
+                addEventListenersToButtons();
+            }
+
+            // --- MODAL & FORM LOGIC ---
+            const modal = document.getElementById('transaksi-modal');
+            const form = document.getElementById('transaksi-form');
+            const modalTitle = document.getElementById('modal-title');
+            function openModal() { modal.classList.remove('hidden'); }
+            function closeModal() { modal.classList.add('hidden'); }
+            document.getElementById('add-transaksi-btn').addEventListener('click', () => {
+                modalTitle.textContent = 'Tambah Transaksi Baru';
+                form.reset();
+                if (sapiSelect.options.length > 0) {
+                    document.querySelector('#transaksi-form input[name="harga_jual"]').value = sapiSelect.options[sapiSelect.selectedIndex].dataset.harga || '';
+                }
+                openModal();
+            });
+            document.getElementById('cancel-btn').addEventListener('click', closeModal);
+
+            // --- EXPORT TO EXCEL LOGIC ---
+            document.getElementById('export-excel-btn').addEventListener('click', () => {
+                const dataToExport = getFilteredData();
+                if (dataToExport.length === 0) { Swal.fire('Tidak ada data', 'Tidak ada data untuk diekspor.', 'info'); return; }
+                const worksheetData = [['ID Transaksi', 'No. Sapi', 'Pembeli', 'Tanggal', 'Total Harga', 'Status', 'Penjual']];
+                dataToExport.forEach(trx => { worksheetData.push([trx.id, trx.no_sapi, trx.pembeli, trx.tanggal, trx.total_harga, trx.status, trx.penjual]); });
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+                XLSX.utils.book_append_sheet(wb, ws, "Laporan Transaksi");
+                const today = new Date().toISOString().slice(0, 10);
+                XLSX.writeFile(wb, `Laporan_Transaksi_${today}.xlsx`);
+            });
+
+            // --- EVENT LISTENERS ---
+            function addEventListenersToButtons() {
+                document.querySelectorAll('.edit-btn').forEach(button => button.addEventListener('click', () => { modalTitle.textContent = 'Edit Transaksi'; openModal(); }));
+                document.querySelectorAll('.delete-btn').forEach(button => button.addEventListener('click', (e) => {
+                    const id = e.currentTarget.closest('.transaksi-item').dataset.id;
+                    Swal.fire({ title: 'Anda yakin?', text: `Transaksi "${id}" akan dihapus!`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonText: 'Batal', confirmButtonText: 'Ya, hapus!' }).then((result) => { if (result.isConfirmed) { Swal.fire('Dihapus!', `Transaksi ${id} telah dihapus.`, 'success'); } });
+                }));
+            }
+
+            // --- SIDEBAR LOGIC ---
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const filterBtn = document.getElementById('filter-btn');
+            const filterSidebar = document.getElementById('filter-sidebar');
+            const filterOverlay = document.getElementById('filter-overlay');
+            const closeFilterBtn = document.getElementById('close-filter-btn');
+            function openSidebar() { sidebar.classList.remove('-translate-x-full'); sidebarOverlay.classList.remove('hidden'); }
+            function closeSidebar() { sidebar.classList.add('-translate-x-full'); sidebarOverlay.classList.add('hidden'); }
+            function openFilter() { filterSidebar.classList.remove('translate-x-full'); filterOverlay.classList.remove('hidden'); }
+            function closeFilter() { filterSidebar.classList.add('translate-x-full'); filterOverlay.classList.add('hidden'); }
+            hamburgerBtn.addEventListener('click', openSidebar);
+            sidebarOverlay.addEventListener('click', closeSidebar);
+            filterBtn.addEventListener('click', openFilter);
+            closeFilterBtn.addEventListener('click', closeFilter);
+            filterOverlay.addEventListener('click', closeFilter);
+
+            // --- INITIAL RENDER & FILTER LISTENERS ---
+            [searchInputDesktop, statusFilterDesktop, startDateFilterDesktop, endDateFilterDesktop, searchInputMobile, statusFilterMobile, startDateFilterMobile, endDateFilterMobile].forEach(el => el.addEventListener('input', renderTransaksi));
+            renderTransaksi();
+        });
+    </script>
+</body>
+
+</html>

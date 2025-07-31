@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Sapi - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="flex min-h-screen bg-gray-200">
+        <!-- Overlay & Sidebar -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+        <aside id="sidebar"
+            class="fixed lg:static inset-y-0 left-0 w-64 bg-gray-800 text-white flex-shrink-0 z-30 transform -translate-x-full lg:translate-x-0">
+            <div class="p-6 text-2xl font-semibold text-center"><ion-icon name="leaf-outline"
+                    class="align-middle"></ion-icon> Admin Farm</div>
+            <nav class="mt-6">
+                <a href="index.html" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700"><ion-icon
+                        name="grid-outline"></ion-icon><span>Dashboard</span></a>
+                <a href="kelola-user.html" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700"><ion-icon
+                        name="people-outline"></ion-icon><span>Kelola User</span></a>
+                <a href="kelola-kandang.html" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700"><ion-icon
+                        name="home-outline"></ion-icon><span>Kelola Kandang</span></a>
+                <a href="kelola-sapi.html"
+                    class="flex items-center gap-3 px-6 py-3 bg-green-700 text-white font-bold"><ion-icon
+                        name="paw-outline"></ion-icon><span>Kelola Sapi</span></a>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6"><a href="../index.html"
+                    class="flex items-center gap-3 text-red-400 hover:text-red-300"><ion-icon
+                        name="log-out-outline"></ion-icon><span>Logout</span></a></div>
+        </aside>
+
+        <!-- Konten Utama -->
+        <div class="flex-1 flex flex-col">
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <button id="hamburger-btn" class="lg:hidden text-gray-600 mr-4"><ion-icon name="menu-outline"
+                            class="text-2xl"></ion-icon></button>
+                    <h1 class="text-xl font-bold text-gray-800">Kelola Sapi</h1>
+                </div>
+                <button id="add-sapi-btn"
+                    class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center gap-2">
+                    <ion-icon name="add-circle-outline"></ion-icon><span class="hidden sm:inline">Tambah Sapi</span>
+                </button>
+            </header>
+            <main class="flex-1 overflow-y-auto bg-gray-100 p-4 md:p-6">
+                <!-- Filter Section -->
+                <div class="sticky top-0 z-10 lg:static mb-6 bg-gray-100 lg:bg-transparent py-2 lg:p-0">
+                    <div class="bg-white p-4 rounded-lg shadow-sm lg:shadow-none">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <input id="search-input" type="search" placeholder="Cari No. Sapi..."
+                                class="w-full p-2 border rounded-lg">
+                            <select id="kandang-filter" class="w-full p-2 border rounded-lg">
+                                <option value="semua">Semua Kandang</option>
+                            </select>
+                            <select id="jenis-filter" class="w-full p-2 border rounded-lg">
+                                <option value="semua">Semua Jenis</option>
+                            </select>
+                            <select id="status-filter" class="w-full p-2 border rounded-lg">
+                                <option value="semua">Semua Status</option>
+                                <option value="Tersedia">Tersedia</option>
+                                <option value="Terjual">Terjual</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tampilan Tabel untuk Desktop -->
+                <div class="hidden lg:block bg-white shadow-md rounded-lg overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3">Foto</th>
+                                <th class="px-6 py-3">No. Sapi</th>
+                                <th class="px-6 py-3">Jenis</th>
+                                <th class="px-6 py-3">Kandang</th>
+                                <th class="px-6 py-3">Bobot</th>
+                                <th class="px-6 py-3">Harga</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sapi-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Tampilan Kartu untuk Mobile -->
+                <div id="sapi-card-container" class="lg:hidden space-y-4"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Form Tambah/Edit Sapi -->
+    <div id="sapi-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-3xl max-h-full overflow-y-auto">
+            <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6">Tambah Sapi Baru</h2>
+            <form id="sapi-form" class="space-y-6">
+                <!-- Data Utama -->
+                <div class="p-4 border rounded-lg">
+                    <p class="text-sm font-semibold text-gray-600 mb-2">Data Utama Sapi</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div><label class="block text-sm font-medium">No. Sapi</label><input name="no_sapi" type="text"
+                                class="mt-1 w-full p-2 border rounded-lg" required></div>
+                        <div><label class="block text-sm font-medium">Jenis Sapi</label><select name="jenis"
+                                class="mt-1 w-full p-2 border rounded-lg"></select></div>
+                        <div><label class="block text-sm font-medium">Kandang</label><select name="kandang"
+                                class="mt-1 w-full p-2 border rounded-lg"></select></div>
+                        <div><label class="block text-sm font-medium">Harga (Rp)</label><input name="harga"
+                                type="number" class="mt-1 w-full p-2 border rounded-lg"></div>
+                        <div><label class="block text-sm font-medium">Status</label><select name="status"
+                                class="mt-1 w-full p-2 border rounded-lg">
+                                <option>Tersedia</option>
+                                <option>Terjual</option>
+                            </select></div>
+                    </div>
+                </div>
+                <!-- Riwayat Bobot -->
+                <div class="p-4 border rounded-lg">
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Riwayat Bobot</label>
+                    <div id="riwayat-bobot-container" class="space-y-2"></div>
+                    <button type="button" id="tambah-bobot-btn"
+                        class="mt-2 text-sm text-green-600 font-semibold flex items-center gap-1"><ion-icon
+                            name="add-circle-outline"></ion-icon>Tambah Catatan Bobot</button>
+                </div>
+                <!-- Upload Media -->
+                <div class="p-4 border rounded-lg space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Foto Sapi (Per Posisi)</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                            <!-- Input Foto Depan -->
+                            <div><label class="block text-xs font-medium text-gray-500">Foto Depan</label>
+                                <div class="flex items-center gap-2 mt-1"><img id="preview_foto_depan"
+                                        src="https://placehold.co/100x100/e5e7eb/a0aec0?text=Preview"
+                                        class="w-16 h-16 object-cover rounded-md"><input id="input_foto_depan"
+                                        name="foto_depan" type="file" accept="image/*"
+                                        class="text-sm w-full file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                                </div>
+                            </div>
+                            <!-- Input Foto Kiri -->
+                            <div><label class="block text-xs font-medium text-gray-500">Foto Kiri</label>
+                                <div class="flex items-center gap-2 mt-1"><img id="preview_foto_kiri"
+                                        src="https://placehold.co/100x100/e5e7eb/a0aec0?text=Preview"
+                                        class="w-16 h-16 object-cover rounded-md"><input id="input_foto_kiri"
+                                        name="foto_kiri" type="file" accept="image/*"
+                                        class="text-sm w-full file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                                </div>
+                            </div>
+                            <!-- Input Foto Kanan -->
+                            <div><label class="block text-xs font-medium text-gray-500">Foto Kanan</label>
+                                <div class="flex items-center gap-2 mt-1"><img id="preview_foto_kanan"
+                                        src="https://placehold.co/100x100/e5e7eb/a0aec0?text=Preview"
+                                        class="w-16 h-16 object-cover rounded-md"><input id="input_foto_kanan"
+                                        name="foto_kanan" type="file" accept="image/*"
+                                        class="text-sm w-full file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                                </div>
+                            </div>
+                            <!-- Input Foto Belakang -->
+                            <div><label class="block text-xs font-medium text-gray-500">Foto Belakang</label>
+                                <div class="flex items-center gap-2 mt-1"><img id="preview_foto_belakang"
+                                        src="https://placehold.co/100x100/e5e7eb/a0aec0?text=Preview"
+                                        class="w-16 h-16 object-cover rounded-md"><input id="input_foto_belakang"
+                                        name="foto_belakang" type="file" accept="image/*"
+                                        class="text-sm w-full file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-600 mb-2">Video Sapi (Max 2)</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-medium text-gray-500">Video 1 (Saat
+                                    Timbang)</label><input name="video_1" type="file"
+                                    class="mt-1 text-sm w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                            <div><label class="block text-xs font-medium text-gray-500">Video 2 (Bodi
+                                    Sapi)</label><input name="video_2" type="file"
+                                    class="mt-1 text-sm w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Keterangan -->
+                <div><label class="block text-sm font-medium">Keterangan</label><textarea name="keterangan" rows="3"
+                        class="mt-1 w-full p-2 border rounded-lg" placeholder="Contoh: Terjual ke Bpk. Budi"></textarea>
+                </div>
+
+                <div class="mt-8 flex justify-end gap-3"><button type="button" id="cancel-btn"
+                        class="bg-gray-200 font-bold py-2 px-6 rounded-lg">Batal</button><button type="submit"
+                        class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg">Simpan</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- DATA SIMULASI ---
+            const sapiData = [
+                { id: 1, no_sapi: 'S001', jenis: 'Limosin', kandang: 'Kandang A', harga: 55000000, status: 'Tersedia', keterangan: '', riwayat_bobot: [{ tanggal: '2025-07-30', berat: 850 }, { tanggal: '2025-07-15', berat: 845 }], foto: { depan: 'https://placehold.co/150x150/a3e635/ffffff?text=Depan', kiri: 'https://placehold.co/150x150/a3e635/ffffff?text=Kiri' } },
+                { id: 2, no_sapi: 'S002', jenis: 'Simental', kandang: 'Kandang A', harga: 62000000, status: 'Terjual', keterangan: 'Terjual ke Bpk. Budi', riwayat_bobot: [{ tanggal: '2025-07-20', berat: 920 }], foto: { depan: 'https://placehold.co/150x150/34d399/ffffff?text=Depan' } },
+                { id: 3, no_sapi: 'S003', jenis: 'Bali', kandang: 'Kandang B', harga: 25000000, status: 'Tersedia', keterangan: '', riwayat_bobot: [{ tanggal: '2025-07-28', berat: 450 }], foto: { depan: 'https://placehold.co/150x150/fbbf24/ffffff?text=Depan' } },
+                { id: 4, no_sapi: 'S004', jenis: 'PO', kandang: 'Kandang D', harga: 35000000, status: 'Tersedia', keterangan: '', riwayat_bobot: [{ tanggal: '2025-07-25', berat: 650 }], foto: {} },
+            ];
+            const kandangOptions = ['Kandang A', 'Kandang B', 'Kandang C (Karantina)', 'Kandang D'];
+            const jenisOptions = ['Limosin', 'Simental', 'Bali', 'PO', 'Brahman', 'Perah'];
+
+            // --- ELEMENT REFERENCES ---
+            const sapiTableBody = document.getElementById('sapi-table-body');
+            const sapiCardContainer = document.getElementById('sapi-card-container');
+            const searchInput = document.getElementById('search-input');
+            const kandangFilter = document.getElementById('kandang-filter');
+            const jenisFilter = document.getElementById('jenis-filter');
+            const statusFilter = document.getElementById('status-filter');
+
+            // --- POPULATE FILTERS & FORM SELECTS ---
+            function populateSelect(selectElement, options) {
+                options.forEach(opt => {
+                    selectElement.innerHTML += `<option value="${opt}">${opt}</option>`;
+                });
+            }
+            populateSelect(kandangFilter, kandangOptions);
+            populateSelect(jenisFilter, jenisOptions);
+            populateSelect(document.querySelector('#sapi-form select[name="kandang"]'), kandangOptions);
+            populateSelect(document.querySelector('#sapi-form select[name="jenis"]'), jenisOptions);
+
+            // --- RENDER FUNCTION ---
+            function renderSapi() {
+                sapiTableBody.innerHTML = '';
+                sapiCardContainer.innerHTML = '';
+                const searchTerm = searchInput.value.toLowerCase();
+                const filters = { kandang: kandangFilter.value, jenis: jenisFilter.value, status: statusFilter.value };
+
+                const filteredData = sapiData.filter(sapi => {
+                    const matchesSearch = sapi.no_sapi.toLowerCase().includes(searchTerm);
+                    const matchesKandang = filters.kandang === 'semua' || sapi.kandang === filters.kandang;
+                    const matchesJenis = filters.jenis === 'semua' || sapi.jenis === filters.jenis;
+                    const matchesStatus = filters.status === 'semua' || sapi.status === filters.status;
+                    return matchesSearch && matchesKandang && matchesJenis && matchesStatus;
+                });
+
+                filteredData.forEach(sapi => {
+                    const statusColor = sapi.status === 'Tersedia' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                    const statusBadge = `<span class="${statusColor} text-xs font-medium px-2.5 py-0.5 rounded">${sapi.status}</span>`;
+                    const latestBobot = sapi.riwayat_bobot.length > 0 ? sapi.riwayat_bobot[0].berat : '-';
+                    const hargaFormatted = new Intl.NumberFormat('id-ID').format(sapi.harga);
+                    const fotoSrc = sapi.foto.depan || 'https://placehold.co/150x150/e5e7eb/ffffff?text=N/A';
+                    const dataAttributes = `data-id="${sapi.id}"`;
+
+                    sapiTableBody.innerHTML += `<tr class="sapi-item bg-white border-b hover:bg-gray-50" ${dataAttributes}><td class="p-4"><img src="${fotoSrc}" class="w-12 h-12 object-cover rounded-md"></td><td class="px-6 py-4 font-bold text-gray-900">${sapi.no_sapi}</td><td class="px-6 py-4">${sapi.jenis}</td><td class="px-6 py-4">${sapi.kandang}</td><td class="px-6 py-4">${latestBobot} kg</td><td class="px-6 py-4">Rp ${hargaFormatted}</td><td class="px-6 py-4">${statusBadge}</td><td class="px-6 py-4 flex gap-3"><button class="edit-btn"><ion-icon name="create-outline" class="text-xl text-blue-600"></ion-icon></button><button class="delete-btn"><ion-icon name="trash-outline" class="text-xl text-red-600"></ion-icon></button></td></tr>`;
+                    sapiCardContainer.innerHTML += `<div class="sapi-item bg-white p-4 rounded-lg shadow-md" ${dataAttributes}><div class="flex gap-4"><img src="${fotoSrc}" class="w-20 h-20 object-cover rounded-md"><div class="flex-1"><div class="flex justify-between items-start"><h3 class="font-bold text-gray-800">${sapi.no_sapi}</h3>${statusBadge}</div><p class="text-sm text-gray-500">${sapi.jenis} | ${sapi.kandang}</p><p class="font-semibold mt-1">Rp ${hargaFormatted}</p></div></div><div class="mt-4 pt-4 border-t flex justify-end gap-3"><button class="edit-btn text-blue-600 text-sm font-semibold flex items-center gap-1"><ion-icon name="create-outline"></ion-icon> Edit</button><button class="delete-btn text-red-600 text-sm font-semibold flex items-center gap-1"><ion-icon name="trash-outline"></ion-icon> Hapus</button></div></div>`;
+                });
+                addEventListenersToButtons();
+            }
+
+            // --- MODAL & FORM LOGIC ---
+            const sapiModal = document.getElementById('sapi-modal');
+            const sapiForm = document.getElementById('sapi-form');
+            const modalTitle = document.getElementById('modal-title');
+            const bobotContainer = document.getElementById('riwayat-bobot-container');
+            const tambahBobotBtn = document.getElementById('tambah-bobot-btn');
+
+            function openModal() { sapiModal.classList.remove('hidden'); }
+            function closeModal() { sapiModal.classList.add('hidden'); }
+
+            document.getElementById('add-sapi-btn').addEventListener('click', () => {
+                modalTitle.textContent = 'Tambah Sapi Baru';
+                sapiForm.reset();
+                bobotContainer.innerHTML = '';
+                resetImagePreviews();
+                addBobotField();
+                openModal();
+            });
+            document.getElementById('cancel-btn').addEventListener('click', closeModal);
+
+            function addBobotField(tanggal = '', berat = '') {
+                const id = Date.now();
+                const field = `<div id="bobot-${id}" class="flex items-center gap-2"><input type="date" value="${tanggal}" class="w-full p-2 border rounded-lg"><input type="number" value="${berat}" placeholder="Bobot (kg)" class="w-full p-2 border rounded-lg"><button type="button" onclick="document.getElementById('bobot-${id}').remove()" class="text-red-500"><ion-icon name="remove-circle-outline"></ion-icon></button></div>`;
+                bobotContainer.insertAdjacentHTML('beforeend', field);
+            }
+            tambahBobotBtn.addEventListener('click', () => addBobotField());
+
+            // --- IMAGE PREVIEW LOGIC ---
+            const previewPlaceholder = 'https://placehold.co/100x100/e5e7eb/a0aec0?text=Preview';
+            function setupImagePreview(inputId, previewId) {
+                const input = document.getElementById(inputId);
+                const preview = document.getElementById(previewId);
+                input.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        preview.src = URL.createObjectURL(file);
+                    }
+                });
+            }
+            setupImagePreview('input_foto_depan', 'preview_foto_depan');
+            setupImagePreview('input_foto_kiri', 'preview_foto_kiri');
+            setupImagePreview('input_foto_kanan', 'preview_foto_kanan');
+            setupImagePreview('input_foto_belakang', 'preview_foto_belakang');
+
+            function resetImagePreviews() {
+                document.getElementById('preview_foto_depan').src = previewPlaceholder;
+                document.getElementById('preview_foto_kiri').src = previewPlaceholder;
+                document.getElementById('preview_foto_kanan').src = previewPlaceholder;
+                document.getElementById('preview_foto_belakang').src = previewPlaceholder;
+            }
+
+            // --- EVENT LISTENERS ---
+            function addEventListenersToButtons() {
+                document.querySelectorAll('.edit-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.currentTarget.closest('.sapi-item').dataset.id;
+                        const sapi = sapiData.find(s => s.id == id);
+                        if (!sapi) return;
+
+                        modalTitle.textContent = 'Edit Sapi';
+                        sapiForm.reset();
+                        resetImagePreviews();
+
+                        sapiForm.no_sapi.value = sapi.no_sapi;
+                        sapiForm.jenis.value = sapi.jenis;
+                        sapiForm.kandang.value = sapi.kandang;
+                        sapiForm.harga.value = sapi.harga;
+                        sapiForm.status.value = sapi.status;
+                        sapiForm.keterangan.value = sapi.keterangan;
+
+                        bobotContainer.innerHTML = '';
+                        sapi.riwayat_bobot.forEach(b => addBobotField(b.tanggal, b.berat));
+
+                        if (sapi.foto.depan) document.getElementById('preview_foto_depan').src = sapi.foto.depan;
+                        if (sapi.foto.kiri) document.getElementById('preview_foto_kiri').src = sapi.foto.kiri;
+                        if (sapi.foto.kanan) document.getElementById('preview_foto_kanan').src = sapi.foto.kanan;
+                        if (sapi.foto.belakang) document.getElementById('preview_foto_belakang').src = sapi.foto.belakang;
+
+                        openModal();
+                    });
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const id = e.currentTarget.closest('.sapi-item').dataset.id;
+                        const sapi = sapiData.find(s => s.id == id);
+                        Swal.fire({
+                            title: 'Anda yakin?', text: `Data sapi "${sapi.no_sapi}" akan dihapus!`, icon: 'warning',
+                            showCancelButton: true, confirmButtonColor: '#d33', cancelButtonText: 'Batal', confirmButtonText: 'Ya, hapus!'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                Swal.fire('Dihapus!', `Data sapi ${sapi.no_sapi} telah dihapus.`, 'success');
+                            }
+                        });
+                    });
+                });
+            }
+
+            // --- RESPONSIVE SIDEBAR LOGIC ---
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            function openSidebar() { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); }
+            function closeSidebar() { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); }
+            hamburgerBtn.addEventListener('click', openSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            // --- INITIAL RENDER & FILTER LISTENERS ---
+            [searchInput, kandangFilter, jenisFilter, statusFilter].forEach(el => {
+                el.addEventListener('input', renderSapi);
+            });
+            renderSapi();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Sapi - Farm App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        /* Custom Style untuk noUiSlider agar sesuai tema */
+        .noUi-connect {
+            background: #16a34a;
+        }
+
+        .noUi-handle {
+            border: 1px solid #d1d5db;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: none;
+        }
+
+        .noUi-handle:after,
+        .noUi-handle:before {
+            display: none;
+        }
+
+        /* Custom Style untuk Choices.js agar sesuai tema */
+        .choices__inner {
+            background-color: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            min-height: auto;
+        }
+
+        .choices[data-type*="select-one"].is-focused .choices__inner {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 1px #16a34a;
+        }
+
+        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .choices__list--dropdown .choices__item {
+            padding: 0.5rem 1rem;
+        }
+
+        /* Transisi untuk sidebar mobile */
+        #filter-sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .choices {
+            z-index: 999;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+
+    <div class="max-w-7xl mx-auto">
+        <div class="p-4">
+            <header class="flex items-center mb-4">
+                <a href="dashboard.html" class="text-green-600 p-2 rounded-full hover:bg-gray-200 mr-3">
+                    <ion-icon name="arrow-back-outline" class="text-2xl align-middle"></ion-icon>
+                </a>
+                <h1 class="text-2xl font-bold text-gray-800">Daftar Sapi</h1>
+            </header>
+
+            <div class="lg:hidden sticky top-0 z-20 py-2 bg-gray-100 -mx-4 px-4 mb-2">
+                <button id="open-filter-btn"
+                    class="w-full flex items-center justify-center gap-2 bg-white p-3 rounded-lg shadow-sm font-semibold text-gray-700 border">
+                    <ion-icon name="filter-outline"></ion-icon>
+                    Tampilkan Filter
+                </button>
+            </div>
+
+            <div class="lg:grid lg:grid-cols-4 lg:gap-8 lg:items-start">
+                <aside id="filter-sidebar"
+                    class="fixed lg:static inset-y-0 left-0 w-72 lg:w-auto bg-white p-6 rounded-r-xl lg:rounded-xl shadow-lg lg:shadow-sm z-40 transform -translate-x-full lg:transform-none">
+                    <div class="flex justify-between items-center lg:hidden mb-6">
+                        <h2 class="font-bold text-xl">Filter</h2>
+                        <button id="close-filter-btn" class="text-gray-500 hover:text-gray-800">
+                            <ion-icon name="close-outline" class="text-3xl"></ion-icon>
+                        </button>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Sapi</label>
+                            <select id="jenis-sapi-select">
+                                <option value="">Semua</option>
+                                <option>Bali</option>
+                                <option>Limosin</option>
+                                <option>Simental</option>
+                                <option>PO (Peranakan Ongole)</option>
+                                <option>Perah</option>
+                                <option>Brahman</option>
+                                <option>Brangus</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bobot (kg)</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" placeholder="Min"
+                                    class="w-full p-2 border border-gray-300 rounded-lg">
+                                <span class="text-gray-500">-</span>
+                                <input type="number" placeholder="Max"
+                                    class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Rentang Harga</label>
+                            <div id="price-slider" class="mt-4 mb-2"></div>
+                            <div id="price-range-display" class="text-center text-sm font-semibold text-gray-600"></div>
+                        </div>
+                        <div class="pt-4">
+                            <button type="submit"
+                                class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300 flex items-center justify-center gap-2">
+                                <ion-icon name="search-outline"></ion-icon>
+                                Terapkan Filter
+                            </button>
+                        </div>
+                    </form>
+                </aside>
+
+                <main class="lg:col-span-3">
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-sm text-gray-500">No. Sapi</p>
+                                        <h2 class="text-xl font-bold text-gray-800">S001</h2>
+                                    </div><span
+                                        class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">Tersedia</span>
+                                </div>
+                                <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-gray-500">Jenis</p>
+                                        <p class="font-semibold text-gray-700">Limosin</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500">Bobot</p>
+                                        <p class="font-semibold text-gray-700">850 kg</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-gray-500">Harga</p>
+                                        <p class="text-lg font-bold text-green-600">Rp 55.000.000</p>
+                                    </div>
+                                </div>
+                            </div><a href="cattle-detail.html"
+                                class="block bg-gray-50 text-center font-semibold text-green-600 p-3 hover:bg-gray-100 transition">Lihat
+                                Detail</a>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden opacity-70">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-sm text-gray-500">No. Sapi</p>
+                                        <h2 class="text-xl font-bold text-gray-500">S002</h2>
+                                    </div><span
+                                        class="bg-red-100 text-red-800 text-xs font-semibold px-3 py-1 rounded-full">Terjual</span>
+                                </div>
+                                <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-500">
+                                    <div>
+                                        <p>Jenis</p>
+                                        <p class="font-semibold">Simental</p>
+                                    </div>
+                                    <div>
+                                        <p>Bobot</p>
+                                        <p class="font-semibold">920 kg</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p>Keterangan</p>
+                                        <p class="font-semibold">Terjual ke Bpk. Budi</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="block bg-gray-200 text-center font-semibold text-gray-500 p-3">Detail Tidak
+                                Tersedia</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-sm text-gray-500">No. Sapi</p>
+                                        <h2 class="text-xl font-bold text-gray-800">S004</h2>
+                                    </div><span
+                                        class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">Tersedia</span>
+                                </div>
+                                <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-gray-500">Jenis</p>
+                                        <p class="font-semibold text-gray-700">Brahman</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500">Bobot</p>
+                                        <p class="font-semibold text-gray-700">780 kg</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-gray-500">Harga</p>
+                                        <p class="text-lg font-bold text-green-600">Rp 48.000.000</p>
+                                    </div>
+                                </div>
+                            </div><a href="cattle-detail.html"
+                                class="block bg-gray-50 text-center font-semibold text-green-600 p-3 hover:bg-gray-100 transition">Lihat
+                                Detail</a>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-sm text-gray-500">No. Sapi</p>
+                                        <h2 class="text-xl font-bold text-gray-800">S005</h2>
+                                    </div><span
+                                        class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">Tersedia</span>
+                                </div>
+                                <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-gray-500">Jenis</p>
+                                        <p class="font-semibold text-gray-700">PO (Peranakan Ongole)</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500">Bobot</p>
+                                        <p class="font-semibold text-gray-700">650 kg</p>
+                                    </div>
+                                    <div class="col-span-2">
+                                        <p class="text-gray-500">Harga</p>
+                                        <p class="text-lg font-bold text-green-600">Rp 35.000.000</p>
+                                    </div>
+                                </div>
+                            </div><a href="cattle-detail.html"
+                                class="block bg-gray-50 text-center font-semibold text-green-600 p-3 hover:bg-gray-100 transition">Lihat
+                                Detail</a>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cek sesi login
+            const userRole = localStorage.getItem('userRole');
+            if (!userRole) {
+                window.location.href = window.location.origin + '/index.html';
+                return;
+            }
+
+            // Logika untuk sidebar mobile
+            const openBtn = document.getElementById('open-filter-btn');
+            const closeBtn = document.getElementById('close-filter-btn');
+            const sidebar = document.getElementById('filter-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            function openSidebar() {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+
+            function closeSidebar() {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            openBtn.addEventListener('click', openSidebar);
+            closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            // Inisialisasi Choices.js untuk dropdown yang bisa diketik
+            const jenisSapiSelect = document.getElementById('jenis-sapi-select');
+            const choices = new Choices(jenisSapiSelect, {
+                searchEnabled: true,
+                itemSelectText: 'Pilih',
+                shouldSort: false, // Biarkan urutan sesuai HTML
+                placeholder: true,
+                placeholderValue: 'Ketik atau pilih jenis'
+            });
+
+            // Inisialisasi Price Range Slider
+            const priceSlider = document.getElementById('price-slider');
+            const priceDisplay = document.getElementById('price-range-display');
+
+            noUiSlider.create(priceSlider, {
+                start: [20, 80],
+                connect: true,
+                step: 1,
+                range: { 'min': 10, 'max': 150 }
+            });
+
+            function formatToRupiah(value) {
+                const number = value * 1000000;
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(number);
+            }
+
+            priceSlider.noUiSlider.on('update', function (values) {
+                const minPrice = formatToRupiah(values[0]);
+                const maxPrice = formatToRupiah(values[1]);
+                priceDisplay.innerHTML = `${minPrice} - ${maxPrice}`;
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm App - Prototipe Statis</title>
+    <!-- Menggunakan Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Menggunakan Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Menggunakan Heroicons untuk ikon -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <style>
+        /* Style dasar untuk body */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Style untuk menyembunyikan halaman yang tidak aktif */
+        .page {
+            display: none;
+        }
+
+        /* Style untuk menampilkan halaman yang aktif */
+        .page.active {
+            display: block;
+        }
+
+        /* Style untuk modal/popup */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Kontainer Aplikasi Utama -->
+    <div id="app" class="max-w-4xl mx-auto">
+
+        <!-- =================================================================== -->
+        <!-- HALAMAN LOGIN                                                       -->
+        <!-- =================================================================== -->
+        <div id="login-page" class="page active">
+            <div class="min-h-screen flex items-center justify-center p-4">
+                <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+                    <div class="text-center mb-8">
+                        <ion-icon name="leaf-outline" class="text-5xl text-green-600"></ion-icon>
+                        <h1 class="text-3xl font-bold text-gray-800 mt-2">Selamat Datang</h1>
+                        <p class="text-gray-500">Silakan login untuk melanjutkan</p>
+                    </div>
+                    <form id="login-form">
+                        <div class="mb-4">
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" id="username"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                placeholder="Contoh: Tamu">
+                        </div>
+                        <div class="mb-6">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="password"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                placeholder="Contoh: tamu">
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300">Login</button>
+                    </form>
+                    <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Username atau password
+                        salah.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- HALAMAN PEMILIHAN KANDANG (DASHBOARD)                               -->
+        <!-- =================================================================== -->
+        <div id="dashboard-page" class="page">
+            <div class="p-4 sm:p-6">
+                <header class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800">Pilih Kandang</h1>
+                    <button class="navigate-to text-sm text-gray-500 hover:text-red-600"
+                        data-target="login-page">Logout</button>
+                </header>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Kandang Card -->
+                    <div class="navigate-to cursor-pointer bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        data-target="cattle-list-page">
+                        <ion-icon name="grid-outline" class="text-4xl text-green-600 mb-3"></ion-icon>
+                        <h2 class="text-xl font-semibold text-gray-800">Semua Kandang</h2>
+                        <p class="text-gray-500">Lihat semua sapi</p>
+                    </div>
+                    <!-- Kandang Card -->
+                    <div class="navigate-to cursor-pointer bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        data-target="cattle-list-page">
+                        <ion-icon name="home-outline" class="text-4xl text-blue-600 mb-3"></ion-icon>
+                        <h2 class="text-xl font-semibold text-gray-800">Kandang A</h2>
+                        <p class="text-gray-500">Sapi jenis Limosin</p>
+                    </div>
+                    <!-- Kandang Card -->
+                    <div class="navigate-to cursor-pointer bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        data-target="cattle-list-page">
+                        <ion-icon name="home-outline" class="text-4xl text-yellow-600 mb-3"></ion-icon>
+                        <h2 class="text-xl font-semibold text-gray-800">Kandang B</h2>
+                        <p class="text-gray-500">Sapi jenis Simental</p>
+                    </div>
+                    <!-- Kandang Card -->
+                    <div class="navigate-to cursor-pointer bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        data-target="cattle-list-page">
+                        <ion-icon name="home-outline" class="text-4xl text-red-600 mb-3"></ion-icon>
+                        <h2 class="text-xl font-semibold text-gray-800">Kandang C</h2>
+                        <p class="text-gray-500">Sapi jenis Bali & PO</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- HALAMAN DAFTAR SAPI                                                 -->
+        <!-- =================================================================== -->
+        <div id="cattle-list-page" class="page">
+            <div class="p-4 sm:p-6">
+                <header class="flex items-center mb-6">
+                    <button class="navigate-to text-green-600 p-2 rounded-full hover:bg-gray-200 mr-3"
+                        data-target="dashboard-page">
+                        <ion-icon name="arrow-back-outline" class="text-2xl"></ion-icon>
+                    </button>
+                    <h1 class="text-2xl font-bold text-gray-800">Daftar Sapi</h1>
+                </header>
+
+                <!-- Filter Section -->
+                <div class="bg-white p-4 rounded-xl shadow-sm mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Jenis Sapi</label>
+                            <select class="w-full mt-1 p-2 border border-gray-300 rounded-lg">
+                                <option>Semua</option>
+                                <option>Bali</option>
+                                <option>Limosin</option>
+                                <option>Simental</option>
+                                <option>PO</option>
+                                <option>Perah</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Bobot (kg)</label>
+                            <div class="flex items-center mt-1 gap-2">
+                                <input type="number" placeholder="Min"
+                                    class="w-full p-2 border border-gray-300 rounded-lg">
+                                <span>-</span>
+                                <input type="number" placeholder="Max"
+                                    class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600">Harga (Juta Rp)</label>
+                            <div class="flex items-center mt-1 gap-2">
+                                <input type="number" placeholder="Min"
+                                    class="w-full p-2 border border-gray-300 rounded-lg">
+                                <span>-</span>
+                                <input type="number" placeholder="Max"
+                                    class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                        <button
+                            class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300">
+                            Cari
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabel Sapi -->
+                <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">No</th>
+                                <th scope="col" class="px-6 py-3">No Sapi</th>
+                                <th scope="col" class="px-6 py-3">Jenis</th>
+                                <th scope="col" class="px-6 py-3">Bobot (kg)</th>
+                                <th scope="col" class="px-6 py-3">Harga</th>
+                                <th scope="col" class="px-6 py-3">Media</th>
+                                <th scope="col" class="px-6 py-3">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Contoh Data Sapi Tersedia -->
+                            <tr class="bg-white border-b hover:bg-gray-50">
+                                <td class="px-6 py-4">1</td>
+                                <td class="px-6 py-4 font-medium text-gray-900">S001</td>
+                                <td class="px-6 py-4">Limosin</td>
+                                <td class="px-6 py-4">850</td>
+                                <td class="px-6 py-4">Rp 55.000.000</td>
+                                <td class="px-6 py-4">
+                                    <button class="navigate-to text-green-600 hover:underline"
+                                        data-target="cattle-detail-page">Lihat Detail</button>
+                                </td>
+                                <td class="px-6 py-4 text-green-600 font-semibold">Tersedia</td>
+                            </tr>
+                            <!-- Contoh Data Sapi Terjual -->
+                            <tr class="bg-red-50 border-b">
+                                <td class="px-6 py-4">2</td>
+                                <td class="px-6 py-4 font-medium text-gray-500">S002</td>
+                                <td class="px-6 py-4 text-gray-500">Simental</td>
+                                <td class="px-6 py-4 text-gray-500">920</td>
+                                <td class="px-6 py-4 text-gray-500">Rp 62.000.000</td>
+                                <td class="px-6 py-4 text-gray-400">N/A</td>
+                                <td class="px-6 py-4 text-red-600 font-semibold">Terjual ke Bpk. Budi</td>
+                            </tr>
+                            <tr class="bg-white border-b hover:bg-gray-50">
+                                <td class="px-6 py-4">3</td>
+                                <td class="px-6 py-4 font-medium text-gray-900">S003</td>
+                                <td class="px-6 py-4">Bali</td>
+                                <td class="px-6 py-4">450</td>
+                                <td class="px-6 py-4">Rp 25.000.000</td>
+                                <td class="px-6 py-4">
+                                    <button class="navigate-to text-green-600 hover:underline"
+                                        data-target="cattle-detail-page">Lihat Detail</button>
+                                </td>
+                                <td class="px-6 py-4 text-green-600 font-semibold">Tersedia</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- HALAMAN DETAIL SAPI                                                 -->
+        <!-- =================================================================== -->
+        <div id="cattle-detail-page" class="page">
+            <div class="p-4 sm:p-6">
+                <header class="flex items-center mb-6">
+                    <button class="navigate-to text-green-600 p-2 rounded-full hover:bg-gray-200 mr-3"
+                        data-target="cattle-list-page">
+                        <ion-icon name="arrow-back-outline" class="text-2xl"></ion-icon>
+                    </button>
+                    <h1 class="text-2xl font-bold text-gray-800">Detail Sapi: S001</h1>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Kolom Kiri: Galeri -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <h3 class="font-semibold text-lg mb-4 text-gray-800">Galeri Foto & Video</h3>
+                            <!-- Foto Utama -->
+                            <img src="https://placehold.co/800x600/a3e635/ffffff?text=Foto+Sapi+Depan" alt="Foto Sapi"
+                                class="w-full h-auto object-cover rounded-lg mb-4">
+                            <!-- Thumbnail Foto -->
+                            <div class="grid grid-cols-4 gap-2">
+                                <img src="https://placehold.co/150x150/a3e635/ffffff?text=Depan"
+                                    class="cursor-pointer rounded-md border-2 border-green-500">
+                                <img src="https://placehold.co/150x150/d1d5db/ffffff?text=Kiri"
+                                    class="cursor-pointer rounded-md border-2 border-transparent hover:border-green-500">
+                                <img src="https://placehold.co/150x150/d1d5db/ffffff?text=Kanan"
+                                    class="cursor-pointer rounded-md border-2 border-transparent hover:border-green-500">
+                                <img src="https://placehold.co/150x150/d1d5db/ffffff?text=Belakang"
+                                    class="cursor-pointer rounded-md border-2 border-transparent hover:border-green-500">
+                            </div>
+                            <!-- Video -->
+                            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-200 rounded-lg p-4 text-center">
+                                    <ion-icon name="videocam-outline" class="text-4xl text-gray-600 mb-2"></ion-icon>
+                                    <p class="text-sm text-gray-700">Video Saat Ditimbang</p>
+                                </div>
+                                <div class="bg-gray-200 rounded-lg p-4 text-center">
+                                    <ion-icon name="videocam-outline" class="text-4xl text-gray-600 mb-2"></ion-icon>
+                                    <p class="text-sm text-gray-700">Video Bodi Sapi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Kolom Kanan: Info & Aksi -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h2 class="text-2xl font-bold text-gray-900">Sapi Limosin S001</h2>
+                            <p class="text-3xl font-bold text-green-600 mt-2 mb-4">Rp 55.000.000</p>
+
+                            <div class="space-y-3 text-gray-600">
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Jenis:</span>
+                                    <span>Limosin</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium">No Sapi:</span>
+                                    <span>S001</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium">Kandang:</span>
+                                    <span>Kandang A</span>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <h4 class="font-semibold mb-2">Riwayat Bobot</h4>
+                            <ul class="list-disc list-inside text-gray-600 space-y-1">
+                                <li>850 kg <span class="text-xs text-gray-400">(30 Juli 2025)</span></li>
+                                <li>845 kg <span class="text-xs text-gray-400">(15 Juli 2025)</span></li>
+                            </ul>
+
+                            <div id="user-actions" class="mt-6">
+                                <button id="open-sale-modal"
+                                    class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300">
+                                    Lakukan Transaksi
+                                </button>
+                            </div>
+                            <div id="guest-message" class="mt-6 hidden">
+                                <p class="text-center text-sm bg-yellow-100 text-yellow-800 p-3 rounded-lg">Login
+                                    sebagai Penjual untuk melakukan transaksi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL FORM TRANSAKSI PENJUALAN                                      -->
+    <!-- =================================================================== -->
+    <div id="sale-modal" class="modal-overlay">
+        <div
+            class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-lg m-4 transform transition-all duration-300 scale-95">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Form Penjualan</h2>
+                <button id="close-sale-modal" class="text-gray-500 hover:text-gray-800">
+                    <ion-icon name="close-outline" class="text-3xl"></ion-icon>
+                </button>
+            </div>
+            <form>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nama Pembeli</label>
+                        <input type="text" class="mt-1 w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Alamat Pembeli</label>
+                        <input type="text" class="mt-1 w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">DP (Rp)</label>
+                        <input type="number" class="mt-1 w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Metode Bayar</label>
+                        <select class="mt-1 w-full p-2 border border-gray-300 rounded-lg">
+                            <option>Cash</option>
+                            <option>Transfer</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Alamat Kirim</label>
+                        <textarea rows="2" class="mt-1 w-full p-2 border border-gray-300 rounded-lg"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tgl Kirim</label>
+                        <input type="date" class="mt-1 w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Jam Kirim</label>
+                        <input type="time" class="mt-1 w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Penjual</label>
+                        <input type="text" value="Nama Penjual (Otomatis)" readonly
+                            class="mt-1 w-full p-2 border border-gray-300 rounded-lg bg-gray-100">
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end gap-4">
+                    <button type="button" id="cancel-sale"
+                        class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">Batal</button>
+                    <button type="submit"
+                        class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Simpan
+                        Transaksi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =================================================================== -->
+    <!-- JAVASCRIPT UNTUK NAVIGASI                                           -->
+    <!-- =================================================================== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pages = document.querySelectorAll('.page');
+            const navButtons = document.querySelectorAll('.navigate-to');
+            const loginForm = document.getElementById('login-form');
+            const loginError = document.getElementById('login-error');
+            const userActions = document.getElementById('user-actions');
+            const guestMessage = document.getElementById('guest-message');
+
+            const saleModal = document.getElementById('sale-modal');
+            const openModalBtn = document.getElementById('open-sale-modal');
+            const closeModalBtn = document.getElementById('close-sale-modal');
+            const cancelSaleBtn = document.getElementById('cancel-sale');
+
+            // Fungsi untuk menampilkan halaman
+            function showPage(pageId) {
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                    if (page.id === pageId) {
+                        page.classList.add('active');
+                    }
+                });
+                window.scrollTo(0, 0); // Scroll ke atas setiap ganti halaman
+            }
+
+            // Event listener untuk semua tombol navigasi
+            navButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const targetPageId = this.dataset.target;
+                    showPage(targetPageId);
+                });
+            });
+
+            // Logika Login Sederhana
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Reset error message
+                loginError.classList.add('hidden');
+
+                // Logika untuk Tamu
+                if (username.toLowerCase() === 'tamu' && password.toLowerCase() === 'tamu') {
+                    userActions.classList.add('hidden');
+                    guestMessage.classList.remove('hidden');
+                    showPage('dashboard-page');
+                }
+                // Logika untuk User Terdaftar (Penjual)
+                else if (username.toLowerCase() === 'penjual' && password.toLowerCase() === 'penjual') {
+                    userActions.classList.remove('hidden');
+                    guestMessage.classList.add('hidden');
+                    showPage('dashboard-page');
+                }
+                // Logika Gagal
+                else {
+                    loginError.classList.remove('hidden');
+                }
+            });
+
+            // Logika Modal Transaksi
+            function openModal() {
+                saleModal.classList.add('active');
+                // Animasikan modal saat muncul
+                setTimeout(() => {
+                    saleModal.querySelector('div').classList.remove('scale-95');
+                }, 10);
+            }
+
+            function closeModal() {
+                saleModal.querySelector('div').classList.add('scale-95');
+                setTimeout(() => {
+                    saleModal.classList.remove('active');
+                }, 300);
+            }
+
+            if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+            if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+            if (cancelSaleBtn) cancelSaleBtn.addEventListener('click', closeModal);
+
+            // Menutup modal jika klik di luar area konten
+            saleModal.addEventListener('click', function (e) {
+                if (e.target === saleModal) {
+                    closeModal();
+                }
+            });
+
+            // Inisialisasi: Tampilkan halaman login pertama kali
+            showPage('login-page');
+        });
+    </script>
+
+</body>
+
+</html>

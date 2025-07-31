@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Kandang - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <!-- SweetAlert2 untuk notifikasi -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="flex min-h-screen bg-gray-200">
+        <!-- Overlay untuk sidebar mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <!-- Sidebar Navigasi -->
+        <aside id="sidebar"
+            class="fixed lg:static inset-y-0 left-0 w-64 bg-gray-800 text-white flex-shrink-0 z-30 transform -translate-x-full lg:translate-x-0">
+            <div class="p-6 text-2xl font-semibold text-center"><ion-icon name="leaf-outline"
+                    class="align-middle"></ion-icon> Admin Farm</div>
+            <nav class="mt-6">
+                <a href="index.html"
+                    class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors"><ion-icon
+                        name="grid-outline"></ion-icon><span>Dashboard</span></a>
+                <a href="kelola-user.html"
+                    class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors"><ion-icon
+                        name="people-outline"></ion-icon><span>Kelola User</span></a>
+                <a href="kelola-kandang.html"
+                    class="flex items-center gap-3 px-6 py-3 bg-green-700 text-white font-bold"><ion-icon
+                        name="home-outline"></ion-icon><span>Kelola Kandang</span></a>
+                <a href="#" class="flex items-center gap-3 px-6 py-3 hover:bg-gray-700 transition-colors"><ion-icon
+                        name="paw-outline"></ion-icon><span>Kelola Sapi</span></a>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-6"><a href="../index.html"
+                    class="flex items-center gap-3 text-red-400 hover:text-red-300"><ion-icon
+                        name="log-out-outline"></ion-icon><span>Logout</span></a></div>
+        </aside>
+
+        <!-- Konten Utama -->
+        <div class="flex-1 flex flex-col">
+            <header class="bg-white shadow p-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <button id="hamburger-btn" class="lg:hidden text-gray-600 mr-4"><ion-icon name="menu-outline"
+                            class="text-2xl"></ion-icon></button>
+                    <h1 class="text-xl font-bold text-gray-800">Kelola Kandang</h1>
+                </div>
+                <button id="add-kandang-btn"
+                    class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center gap-2">
+                    <ion-icon name="add-circle-outline"></ion-icon><span class="hidden sm:inline">Tambah Kandang</span>
+                </button>
+            </header>
+            <main class="flex-1 bg-gray-100 p-4 md:p-6">
+                <!-- Filter Section -->
+                <div
+                    class="sticky top-4 z-10 lg:sticky lg:top-16 mb-6 bg-gray-100 lg:bg-white py-2 lg:p-4 lg:rounded-lg lg:shadow-sm">
+                    <div class="bg-white p-4 rounded-lg shadow-sm lg:shadow-none">
+                        <input id="search-input" type="search" placeholder="Cari nama kandang atau lokasi..."
+                            class="w-full p-2 border border-gray-300 rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Tampilan Tabel untuk Desktop -->
+                <div class="hidden lg:block bg-white shadow-md rounded-lg overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3">Nama Kandang</th>
+                                <th class="px-6 py-3">Lokasi</th>
+                                <th class="px-6 py-3">Kapasitas</th>
+                                <th class="px-6 py-3">Keterangan</th>
+                                <th class="px-6 py-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kandang-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Tampilan Kartu untuk Mobile -->
+                <div id="kandang-card-container" class="lg:hidden space-y-4"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Form Tambah/Edit Kandang -->
+    <div id="kandang-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-lg max-h-full overflow-y-auto">
+            <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6">Tambah Kandang Baru</h2>
+            <form id="kandang-form" class="space-y-4">
+                <div><label class="block text-sm font-medium">Nama Kandang</label><input name="nama" type="text"
+                        class="mt-1 w-full p-2 border rounded-lg" required></div>
+                <div><label class="block text-sm font-medium">Lokasi</label><input name="lokasi" type="text"
+                        class="mt-1 w-full p-2 border rounded-lg"></div>
+                <div><label class="block text-sm font-medium">Kapasitas (ekor)</label><input name="kapasitas"
+                        type="number" class="mt-1 w-full p-2 border rounded-lg"></div>
+                <div><label class="block text-sm font-medium">Keterangan</label><textarea name="keterangan" rows="3"
+                        class="mt-1 w-full p-2 border rounded-lg"></textarea></div>
+                <div class="mt-8 flex justify-end gap-3">
+                    <button type="button" id="cancel-btn"
+                        class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg">Batal</button>
+                    <button type="submit" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- DATA SIMULASI ---
+            const kandangData = [
+                { id: 1, nama: 'Kandang A', lokasi: 'Blok Utara', kapasitas: 50, keterangan: 'Kandang khusus sapi Limosin dan Simental.' },
+                { id: 2, nama: 'Kandang B', lokasi: 'Blok Timur', kapasitas: 75, keterangan: 'Kandang penggemukan sapi Bali.' },
+                { id: 3, nama: 'Kandang C (Karantina)', lokasi: 'Blok Barat', kapasitas: 20, keterangan: 'Kandang untuk sapi baru atau sakit.' },
+                { id: 4, nama: 'Kandang D', lokasi: 'Blok Selatan', kapasitas: 60, keterangan: 'Kandang sapi Peranakan Ongole (PO).' },
+                { id: 4, nama: 'Kandang D', lokasi: 'Blok Selatan', kapasitas: 60, keterangan: 'Kandang sapi Peranakan Ongole (PO).' },
+                { id: 4, nama: 'Kandang D', lokasi: 'Blok Selatan', kapasitas: 60, keterangan: 'Kandang sapi Peranakan Ongole (PO).' },
+                { id: 4, nama: 'Kandang D', lokasi: 'Blok Selatan', kapasitas: 60, keterangan: 'Kandang sapi Peranakan Ongole (PO).' },
+                { id: 4, nama: 'Kandang D', lokasi: 'Blok Selatan', kapasitas: 60, keterangan: 'Kandang sapi Peranakan Ongole (PO).' },
+                { id: 4, nama: 'Kandang D', lokasi: 'Blok Selatan', kapasitas: 60, keterangan: 'Kandang sapi Peranakan Ongole (PO).' },
+            ];
+
+            const kandangTableBody = document.getElementById('kandang-table-body');
+            const kandangCardContainer = document.getElementById('kandang-card-container');
+            const searchInput = document.getElementById('search-input');
+
+            // --- FUNGSI RENDER DATA ---
+            function renderKandang() {
+                kandangTableBody.innerHTML = '';
+                kandangCardContainer.innerHTML = '';
+                const searchTerm = searchInput.value.toLowerCase();
+
+                const filteredData = kandangData.filter(kandang => {
+                    return kandang.nama.toLowerCase().includes(searchTerm) || kandang.lokasi.toLowerCase().includes(searchTerm);
+                });
+
+                if (filteredData.length === 0) {
+                    const emptyRow = `<tr><td colspan="5" class="text-center py-4">Data tidak ditemukan.</td></tr>`;
+                    kandangTableBody.innerHTML = emptyRow;
+                    kandangCardContainer.innerHTML = `<div class="bg-white p-4 rounded-lg text-center">Data tidak ditemukan.</div>`;
+                    return;
+                }
+
+                filteredData.forEach(kandang => {
+                    const dataAttributes = `data-id="${kandang.id}" data-nama="${kandang.nama}" data-lokasi="${kandang.lokasi}" data-kapasitas="${kandang.kapasitas}" data-keterangan="${kandang.keterangan}"`;
+
+                    // Render Tabel (Desktop)
+                    kandangTableBody.innerHTML += `
+                        <tr class="kandang-item bg-white border-b hover:bg-gray-50" ${dataAttributes}>
+                            <td class="px-6 py-4 font-medium text-gray-900">${kandang.nama}</td>
+                            <td class="px-6 py-4">${kandang.lokasi}</td>
+                            <td class="px-6 py-4">${kandang.kapasitas} ekor</td>
+                            <td class="px-6 py-4">${kandang.keterangan}</td>
+                            <td class="px-6 py-4 flex gap-3">
+                                <button class="edit-btn text-blue-600 hover:text-blue-800"><ion-icon name="create-outline" class="text-xl"></ion-icon></button>
+                                <button class="delete-btn text-red-600 hover:text-red-800"><ion-icon name="trash-outline" class="text-xl"></ion-icon></button>
+                            </td>
+                        </tr>`;
+
+                    // Render Kartu (Mobile)
+                    kandangCardContainer.innerHTML += `
+                        <div class="kandang-item bg-white p-4 rounded-lg shadow-md" ${dataAttributes}>
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-gray-800">${kandang.nama}</h3>
+                                <p class="text-sm text-gray-500">${kandang.lokasi}</p>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">${kandang.keterangan}</p>
+                            <p class="text-sm font-semibold text-gray-700 mt-2">Kapasitas: ${kandang.kapasitas} ekor</p>
+                            <div class="mt-4 pt-4 border-t flex justify-end gap-3">
+                                <button class="edit-btn text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center gap-1"><ion-icon name="create-outline"></ion-icon> Edit</button>
+                                <button class="delete-btn text-red-600 hover:text-red-800 text-sm font-semibold flex items-center gap-1"><ion-icon name="trash-outline"></ion-icon> Hapus</button>
+                            </div>
+                        </div>`;
+                });
+                addEventListenersToButtons();
+            }
+
+            // --- MODAL LOGIC ---
+            const addKandangBtn = document.getElementById('add-kandang-btn');
+            const kandangModal = document.getElementById('kandang-modal');
+            const kandangForm = document.getElementById('kandang-form');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const modalTitle = document.getElementById('modal-title');
+
+            function openModal() { kandangModal.classList.remove('hidden'); }
+            function closeModal() { kandangModal.classList.add('hidden'); }
+
+            addKandangBtn.addEventListener('click', () => {
+                modalTitle.textContent = 'Tambah Kandang Baru';
+                kandangForm.reset();
+                openModal();
+            });
+
+            cancelBtn.addEventListener('click', closeModal);
+
+            // --- EVENT LISTENERS UNTUK TOMBOL AKSI ---
+            function addEventListenersToButtons() {
+                document.querySelectorAll('.edit-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const item = e.currentTarget.closest('.kandang-item');
+                        const data = item.dataset;
+
+                        modalTitle.textContent = 'Edit Kandang';
+                        kandangForm.nama.value = data.nama;
+                        kandangForm.lokasi.value = data.lokasi;
+                        kandangForm.kapasitas.value = data.kapasitas;
+                        kandangForm.keterangan.value = data.keterangan;
+
+                        openModal();
+                    });
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const item = e.currentTarget.closest('.kandang-item');
+                        const kandangName = item.dataset.nama;
+
+                        Swal.fire({
+                            title: 'Anda yakin?', text: `Data kandang "${kandangName}" akan dihapus!`, icon: 'warning',
+                            showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                Swal.fire('Dihapus!', `Data kandang ${kandangName} telah dihapus.`, 'success');
+                            }
+                        });
+                    });
+                });
+            }
+
+            // --- RESPONSIVE SIDEBAR LOGIC ---
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            function openSidebar() { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); }
+            function closeSidebar() { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); }
+            hamburgerBtn.addEventListener('click', openSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            // --- INITIAL RENDER & FILTER LISTENER ---
+            searchInput.addEventListener('keyup', renderKandang);
+            renderKandang();
+        });
+    </script>
+</body>
+
+</html>

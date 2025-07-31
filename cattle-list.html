@@ -257,7 +257,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Cek sesi login
-            const userRole = localStorage.getItem('userRole');
+            const userRole = 'guest';
             if (!userRole) {
                 window.location.href = window.location.origin + '/index.html';
                 return;

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Farm App</title>
+    <title>Login - Farm App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
@@ -13,75 +13,72 @@
 
 <body class="bg-gray-100">
 
-    <div class="max-w-4xl mx-auto p-4 sm:p-6">
-        <header class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Pilih Kandang</h1>
-                <p id="welcome-message" class="text-gray-600">Selamat datang!</p>
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+            <div class="text-center mb-8">
+                <ion-icon name="leaf-outline" class="text-5xl text-green-600"></ion-icon>
+                <h1 class="text-3xl font-bold text-gray-800 mt-2">Selamat Datang</h1>
+                <p class="text-gray-500">Silakan login untuk melanjutkan</p>
             </div>
-            <button id="logout-btn"
-                class="bg-red-500 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
-                Logout
-            </button>
-        </header>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <a href="cattle-list.html"
-                class="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <ion-icon name="grid-outline" class="text-4xl text-green-600 mb-3"></ion-icon>
-                <h2 class="text-xl font-semibold text-gray-800">Semua Kandang</h2>
-                <p class="text-gray-500">Lihat semua sapi</p>
-            </a>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" id="username"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                        placeholder="Coba: tamu atau penjual">
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                        placeholder="Coba: tamu atau penjual">
+                </div>
+                <button type="submit"
+                    class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300">Login</button>
+            </form>
 
-            <a href="cattle-list.html"
-                class="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <ion-icon name="home-outline" class="text-4xl text-blue-600 mb-3"></ion-icon>
-                <h2 class="text-xl font-semibold text-gray-800">Kandang A</h2>
-                <p class="text-gray-500">Sapi jenis Limosin</p>
-            </a>
-
-            <a href="cattle-list.html"
-                class="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <ion-icon name="home-outline" class="text-4xl text-yellow-600 mb-3"></ion-icon>
-                <h2 class="text-xl font-semibold text-gray-800">Kandang B</h2>
-                <p class="text-gray-500">Sapi jenis Simental</p>
-            </a>
-
-            <a href="cattle-list.html"
-                class="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                <ion-icon name="home-outline" class="text-4xl text-red-600 mb-3"></ion-icon>
-                <h2 class="text-xl font-semibold text-gray-800">Kandang C</h2>
-                <p class="text-gray-500">Sapi jenis Bali & PO</p>
-            </a>
+            <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Username atau password salah.</p>
+            <div class="text-center text-xs text-gray-400 mt-6">
+                <p>Untuk simulasi:</p>
+                <p>User: <strong>tamu</strong>, Pass: <strong>tamu</strong></p>
+                <p>User: <strong>penjual</strong>, Pass: <strong>penjual</strong></p>
+                <p>User: <strong>admin</strong>, Pass: <strong>admin</strong></p>
+            </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const userRole = localStorage.getItem('userRole');
-            const welcomeMessage = document.getElementById('welcome-message');
+        document.getElementById('login-form').addEventListener('submit', function (e) {
+            e.preventDefault(); // Mencegah form mengirim data secara tradisional
 
-            // Jika tidak ada role di localStorage, redirect ke login
-            if (!userRole) {
-                window.location.href = 'index.html';
-                return; // Hentikan eksekusi script
+            const username = document.getElementById('username').value.toLowerCase();
+            const password = document.getElementById('password').value.toLowerCase();
+            const loginError = document.getElementById('login-error');
+
+            let role = null;
+
+            if (username === 'tamu' && password === 'tamu') {
+                role = 'guest';
+            } else if (username === 'penjual' && password === 'penjual') {
+                role = 'seller';
+            } else if (username === 'admin' && password === 'admin') {
+                role = 'admin';
             }
 
-            // Personalisasi pesan selamat datang
-            if (userRole === 'guest') {
-                welcomeMessage.textContent = 'Selamat datang, Tamu!';
-            } else if (userRole === 'seller') {
-                welcomeMessage.textContent = 'Selamat datang, Penjual!';
+            if (role) {
+                // Simpan peran pengguna di localStorage agar bisa diakses halaman lain
+                localStorage.setItem('userRole', role);
+                // Arahkan ke halaman dashboard
+                if (role === 'guest' || role === 'seller') {
+                    window.location.href = 'dashboard.html';
+                } else if (role === 'admin') {
+                    // Jika admin, arahkan ke halaman admin
+                    window.location.href = 'admin/index.html';
+                }
+            } else {
+                loginError.classList.remove('hidden');
             }
-
-            // Fungsi logout
-            const logoutButton = document.getElementById('logout-btn');
-            logoutButton.addEventListener('click', function () {
-                // Hapus data dari localStorage
-                localStorage.removeItem('userRole');
-                // Arahkan kembali ke halaman login
-                window.location.href = 'index.html';
-            });
         });
     </script>
 
